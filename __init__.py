@@ -1,24 +1,20 @@
 from sqlmodel import Session, select
-from models import engine, Snack, Room, Snack_BaseModel, Order_Model
+from .models import engine, Snack, Room, Snack_BaseModel, Order_Model
 from typing import List
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from nonebot import get_app
+from . import handler
 
-app = FastAPI()
-
-origins = [
-    "*",
-]
+app = get_app()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/snacks", response_model=List[Snack])
 def get_snacks():
@@ -48,6 +44,6 @@ async def get_rooms():
 
 @app.post("/order")
 async def on_order(order: Order_Model):
-    print("🛒 cart => ", order.cart)
-    print("🚪 room_number_string => ", order.room_number_string)
+    await handler.send_msg(f"🛒 : {order.cart}")
+    await handler.send_msg(f"🚪 : {order.room_number_string}")
     return Response(status_code=200)
